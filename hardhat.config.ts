@@ -5,6 +5,9 @@ import { mnemonic } from "./secret.json";
 const config: HardhatUserConfig = {
   solidity: "0.8.12",
 
+  etherscan: {
+    apiKey: 'F2ZX6AFPCDWNRK7XHV1A9XQ24ESDG4IF81',
+  },
   defaultNetwork: "testnet",
   networks: {
     localhost: {

@@ -1,13 +1,27 @@
-# Sample Hardhat Project
+# LTY STAKING
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+The Smart contract that used to stake the LTY Tokens
 
-Try running some of the following tasks:
+## UNIT TESTING
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
-```
+TEST THE SMART CONTRACT :
+
+- npx hardhat test
+
+## COMPILE AND DEPLOY/VERIFY/TEST(UNIT TESTING) THE SMART CONTRACT
+
+COMPILE SMART CONTRACT :
+
+- yarn hardhat compile
+
+DEPLOY THE SMART CONTRACT :
+
+- npx hardhat run scripts/"name of the script".ts --network "name of the network example : polygon_mumbai"
+
+VERIFY THE SMART CONTRACT :
+
+- npx hardhat verify --network "name of the network example : mainnet" "address of the smart contract"
+
+TEST THE CONTRACT :
+
+- npx hardhat test
