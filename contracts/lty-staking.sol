@@ -10,7 +10,7 @@ contract stakingLTY is Ownable, ReentrancyGuard, Pausable {
     address private reserve; // the reserve address
     IERC20 private immutable lty; // the lty token
 
-    address[] public userStaked; // the users who staked
+    address[] public userStaked; // the user who staked
     mapping(address => uint256) public staked; // how much the user staked
     mapping(address => uint256) public timeStaked; // when the user staked
 
@@ -59,11 +59,11 @@ contract stakingLTY is Ownable, ReentrancyGuard, Pausable {
             if (timeStaked[user] < actualDate) {
                 uint256 reward = rewardByUser(user);
 
+                lty.transferFrom(reserve, address(this), reward);
+
                 timeStaked[user] = actualDate;
                 staked[user] += reward;
                 totalStaked += reward;
-
-                lty.transferFrom(reserve, address(this), reward);
             }
         }
         APY = _APY;
@@ -84,11 +84,11 @@ contract stakingLTY is Ownable, ReentrancyGuard, Pausable {
         uint256 rewardInterval = 365 days;
 
         return (((_amountStaked * APY) *
-            ((timeDiff * 10 ** 18) / rewardInterval)) / 10 ** 21); // 10 ** 18 for the decimals to not be at 0 and 10 ** 3 for the APY
+            ((timeDiff * 10 ** 18) / rewardInterval)) / 10 ** 21); // 10 ** 18 for the decimals to not be at 0, 10 ** 3 for the APY, finally : 21 = 18 + 3
     }
 
     /*
-     * @dev function to get the reward accumulated by the user
+     * @dev function to claim the reward of the user
      */
     function claim() external whenNotPaused nonReentrant {
         require(staked[msg.sender] > 0, "You don't have any staked LTY");
@@ -107,7 +107,7 @@ contract stakingLTY is Ownable, ReentrancyGuard, Pausable {
     }
 
     /*
-     * @dev function to stake the tokens
+     * @dev function to stake the tokens and get the reward if there is one
      * @param _amount the amount of tokens to stake
      */
     function stake(uint256 _amount) external whenNotPaused nonReentrant {
