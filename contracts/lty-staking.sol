@@ -19,6 +19,8 @@ contract stakingLTY is Ownable, ReentrancyGuard, Pausable {
     uint256 public APY; // APY based on the total staked with 3 decimals (ex: 100 = 0.1 = 10%)
 
     constructor(address _reserve, address _lty, uint256 _APY) {
+        require(_reserve != address(0), "The reserve address can't be 0");
+        require(_lty != address(0), "The lty address can't be 0");
         reserve = _reserve;
         lty = IERC20(_lty);
         APY = _APY;
@@ -50,7 +52,7 @@ contract stakingLTY is Ownable, ReentrancyGuard, Pausable {
      * @dev function to set the APY with 3 decimals (ex: 100 = 0.1 = 10%) and claim the reward for all users
      * @param _APY the APY
      */
-    function setAPY(uint _APY) external onlyOwner {
+    function setAPY(uint256 _APY) external onlyOwner {
         uint256 actualDate = block.timestamp;
 
         for (uint i = 0; i < userStaked.length; i++) {

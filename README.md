@@ -6,7 +6,7 @@ The Smart contract that used to stake the LTY Tokens
 
 TEST THE SMART CONTRACT :
 
-- npx hardhat test
+- npx hardhat test --network hardhat
 
 ## COMPILE AND DEPLOY/VERIFY/TEST(UNIT TESTING) THE SMART CONTRACT
 
@@ -16,7 +16,7 @@ COMPILE SMART CONTRACT :
 
 DEPLOY THE SMART CONTRACT :
 
-- npx hardhat run scripts/"name of the script".ts --network "name of the network example : polygon_mumbai"
+- npx hardhat run scripts/"name of the script".ts --network "name of the network example : mainnet"
 
 VERIFY THE SMART CONTRACT :
 

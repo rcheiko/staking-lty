@@ -12,7 +12,7 @@ contract ltyToken is ERC20, Ownable {
         _mint(_to, _amount * 10 ** 18);
     }
 
-    function withdraw(uint _amount) external {
+    function burn(uint _amount) external {
         _burn(msg.sender, _amount * 10 ** 18);
     }
 }

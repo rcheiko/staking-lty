@@ -3,15 +3,24 @@ import "@nomicfoundation/hardhat-toolbox";
 import { mnemonic } from "./secret.json";
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.12",
+  solidity: {
+    version: "0.8.18",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 500,
+      },
+    },
+  },
+
 
   etherscan: {
-    apiKey: 'F2ZX6AFPCDWNRK7XHV1A9XQ24ESDG4IF81',
+    apiKey: "F2ZX6AFPCDWNRK7XHV1A9XQ24ESDG4IF81",
   },
   defaultNetwork: "testnet",
   networks: {
-    localhost: {
-      url: "http://127.0.0.1:8545",
+    hardhat: {
+      chainId: 1337,
     },
     testnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
@@ -29,7 +38,6 @@ const config: HardhatUserConfig = {
   gasReporter: {
     enabled: true,
   },
-
 };
 
 export default config;
