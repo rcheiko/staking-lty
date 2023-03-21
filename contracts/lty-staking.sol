@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 
-contract stakingLTY is Ownable, ReentrancyGuard, Pausable {
+contract ltyStaking is Ownable, ReentrancyGuard, Pausable {
     address private reserve; // the reserve address
     IERC20 private immutable lty; // the lty token
 
@@ -100,10 +100,7 @@ contract stakingLTY is Ownable, ReentrancyGuard, Pausable {
         );
 
         uint256 reward = rewardByUser(msg.sender);
-
         timeStaked[msg.sender] = block.timestamp;
-        staked[msg.sender] -= reward;
-        totalStaked -= reward;
 
         lty.transferFrom(reserve, msg.sender, reward);
     }

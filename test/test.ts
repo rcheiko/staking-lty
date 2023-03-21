@@ -14,7 +14,7 @@ describe("Test", function () {
     const ltyToken = await lty.deploy();
     console.log("ltyToken deployed to:", ltyToken.address);
 
-    const staking = await ethers.getContractFactory("stakingLTY");
+    const staking = await ethers.getContractFactory("ltyStaking");
     const ltyStaking = await staking.deploy(
       reserveAddress.address,
       ltyToken.address,
@@ -214,7 +214,9 @@ describe("Test", function () {
 
       await ltyStaking.stake(ethers.utils.parseUnits("1000", 18));
 
-      expect(await ltyStaking.userStaked(0)).to.equal('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266')
+      expect(await ltyStaking.userStaked(0)).to.equal(
+        "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+      );
 
       await time.increase(365 * 24 * 60 * 60); // 1 year
 
@@ -259,8 +261,9 @@ describe("Test", function () {
         .to.above(20n * 10n ** 18n)
         .to.below(21n * 10n ** 18n);
 
-        expect(await ltyStaking.userStaked(0)).to.equal('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266')
-  
+      expect(await ltyStaking.userStaked(0)).to.equal(
+        "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+      );
 
       await ltyStaking.unstake(await ltyStaking.staked(owner.address));
 
@@ -269,7 +272,41 @@ describe("Test", function () {
         .to.below(21n * 10n ** 18n);
 
       expect(await ltyStaking.staked(owner.address)).to.equal(0);
+    });
 
+    it("Mint and stake 10 LTY wait 1 year, claim and withdraw my 10 LTY", async function () {
+      const { ltyStaking, ltyToken, owner } = await loadFixture(
+        deployLtyStakingAndToken
+      );
+
+      await ltyToken.approve(
+        ltyStaking.address,
+        ethers.utils.parseUnits("10", 18)
+      );
+      await ltyToken.mint(owner.address, 10);
+      await ltyStaking.stake(ethers.utils.parseUnits("10", 18));
+
+      await time.increase(300 * 24 * 60 * 60); // 300 days
+      await ltyStaking.claim();
+
+      expect(await ltyToken.balanceOf(owner.address))
+        .to.above(8n * 10n ** 18n)
+        .to.below(9n * 10n ** 18n);
+
+      expect(await ltyStaking.staked(owner.address)).to.equal(10n * 10n ** 18n);
+
+      expect(await ltyStaking.totalStaked()).to.equal(10n * 10n ** 18n);
+
+      expect(await ltyStaking.rewardByUser(owner.address)).to.equal(0);
+
+      await ltyStaking.unstake(await ltyStaking.staked(owner.address));
+
+      expect(await ltyStaking.staked(owner.address)).to.equal(0);
+      expect(await ltyStaking.totalStaked()).to.equal(0);
+      expect(await ltyStaking.rewardByUser(owner.address)).to.equal(0);
+      expect(await ltyToken.balanceOf(owner.address))
+        .to.above(18n * 10n ** 18n)
+        .to.below(19n * 10n ** 18n);
     });
   });
 });
