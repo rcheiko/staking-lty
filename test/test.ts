@@ -1,5 +1,4 @@
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-// import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
@@ -354,6 +353,46 @@ describe("Test", function () {
       expect(await ltyStaking.timeStaked(owner.address)).to.equal(
         timeStaked.toString()
       );
+    });
+    it("Mint 1000 LTY wait 1 year setApy to 0 wait 1 year unstake 1000 LTY", async function () {
+      const { ltyStaking, ltyToken, owner, reserveAddress } = await loadFixture(
+        deployLtyStakingAndToken
+      );
+
+      await ltyToken
+        .connect(reserveAddress)
+        .approve(ltyStaking.address, ethers.utils.parseUnits("3000", 18));
+
+      await ltyToken.approve(
+        ltyStaking.address,
+        ethers.utils.parseUnits("1000", 18)
+      );
+      await ltyToken.mint(owner.address, 1000);
+      await ltyStaking.stake(ethers.utils.parseUnits("1000", 18));
+
+      await time.increase(360 * 24 * 60 * 60); // 1 year
+      await ltyStaking.setAPY(0);
+
+      expect(await ltyStaking.staked(owner.address))
+        .to.above(ethers.utils.parseUnits("1986", 18))
+        .to.below(ethers.utils.parseUnits("1987", 18));
+
+      expect(await ltyStaking.totalStaked())
+        .to.above(ethers.utils.parseUnits("1986", 18))
+        .to.below(ethers.utils.parseUnits("1987", 18));
+
+      await time.increase(365 * 24 * 60 * 60); // 1 year
+      
+      expect(await ltyStaking.rewardByUser(owner.address)).to.equal(0)
+
+      await ltyStaking.unstake(await ltyStaking.staked(owner.address));
+
+      expect(await ltyToken.balanceOf(owner.address))
+        .to.above(ethers.utils.parseUnits("1986", 18))
+        .to.below(ethers.utils.parseUnits("1987", 18));
+      expect(await ltyStaking.staked(owner.address)).to.equal(0);
+      expect(await ltyStaking.totalStaked()).to.equal(0);
+      expect(await ltyStaking.rewardByUser(owner.address)).to.equal(0);
     });
   });
 });

@@ -13,7 +13,6 @@ async function main() {
   const Staking = await ethers.getContractFactory("ltyStaking");
   const staking = await Staking.deploy(deployer.address, token.address, 1000);
   console.log("Staking address:", staking.address);
-
 }
 
 main()
