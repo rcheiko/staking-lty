@@ -238,8 +238,8 @@ describe("Test", function () {
 
       expect(await ltyStaking.staked(owner.address)).to.equal(0);
       expect(await ltyToken.balanceOf(owner.address))
-        .to.above(2000n * 10n ** 18n)
-        .to.below(2001n * 10n ** 18n);
+        .to.above(ethers.utils.parseUnits("2000", 18))
+        .to.below(ethers.utils.parseUnits("2001", 18));
     });
 
     it("Mint and stake 10 LTY wait 1 year setAPY to 1000, unstake 10 LTY", async function () {
@@ -258,8 +258,8 @@ describe("Test", function () {
       await ltyStaking.setAPY(1000);
 
       expect(await ltyStaking.staked(owner.address))
-        .to.above(20n * 10n ** 18n)
-        .to.below(21n * 10n ** 18n);
+        .to.above(ethers.utils.parseUnits("20", 18))
+        .to.below(ethers.utils.parseUnits("21", 18));
 
       expect(await ltyStaking.userStaked(0)).to.equal(
         "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
@@ -268,8 +268,8 @@ describe("Test", function () {
       await ltyStaking.unstake(await ltyStaking.staked(owner.address));
 
       expect(await ltyToken.balanceOf(owner.address))
-        .to.above(20n * 10n ** 18n)
-        .to.below(21n * 10n ** 18n);
+        .to.above(ethers.utils.parseUnits("20", 18))
+        .to.below(ethers.utils.parseUnits("21", 18));
 
       expect(await ltyStaking.staked(owner.address)).to.equal(0);
     });
@@ -290,12 +290,16 @@ describe("Test", function () {
       await ltyStaking.claim();
 
       expect(await ltyToken.balanceOf(owner.address))
-        .to.above(8n * 10n ** 18n)
-        .to.below(9n * 10n ** 18n);
+        .to.above(ethers.utils.parseUnits("8", 18))
+        .to.below(ethers.utils.parseUnits("9", 18));
 
-      expect(await ltyStaking.staked(owner.address)).to.equal(10n * 10n ** 18n);
+      expect(await ltyStaking.staked(owner.address)).to.equal(
+        ethers.utils.parseUnits("10", 18)
+      );
 
-      expect(await ltyStaking.totalStaked()).to.equal(10n * 10n ** 18n);
+      expect(await ltyStaking.totalStaked()).to.equal(
+        ethers.utils.parseUnits("10", 18)
+      );
 
       expect(await ltyStaking.rewardByUser(owner.address)).to.equal(0);
 
@@ -305,8 +309,51 @@ describe("Test", function () {
       expect(await ltyStaking.totalStaked()).to.equal(0);
       expect(await ltyStaking.rewardByUser(owner.address)).to.equal(0);
       expect(await ltyToken.balanceOf(owner.address))
-        .to.above(18n * 10n ** 18n)
-        .to.below(19n * 10n ** 18n);
+        .to.above(ethers.utils.parseUnits("18", 18))
+        .to.below(ethers.utils.parseUnits("19", 18));
+    });
+
+    it("Mint 1001 LTY wait 1 year unstake 1001 LTY and check if the reward will be reverted", async function () {
+      const { ltyStaking, ltyToken, owner, reserveAddress } = await loadFixture(
+        deployLtyStakingAndToken
+      );
+      await ltyToken
+        .connect(reserveAddress)
+        .approve(ltyStaking.address, ethers.utils.parseUnits("3000", 18));
+
+      await ltyToken.mint(owner.address, 1001);
+
+      await ltyToken.approve(
+        ltyStaking.address,
+        ethers.utils.parseUnits("1001", 18)
+      );
+
+      await ltyStaking.stake(ethers.utils.parseUnits("1001", 18));
+      const timeStaked = await ltyStaking.timeStaked(owner.address);
+
+      expect(await ltyStaking.userStaked(0)).to.equal(
+        "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+      );
+
+      await time.increase(365 * 24 * 60 * 60); // 1 year
+
+      await expect(
+        ltyStaking.unstake(ethers.utils.parseUnits("1001", 18))
+      ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
+
+      expect(await ltyStaking.totalStaked()).to.equal(
+        ethers.utils.parseUnits("1001", 18)
+      );
+      expect(await ltyStaking.staked(owner.address)).to.equal(
+        ethers.utils.parseUnits("1001", 18)
+      );
+      expect(await ltyToken.balanceOf(owner.address)).to.equal(0);
+      expect(await ltyStaking.rewardByUser(owner.address)).to.above(
+        ethers.utils.parseUnits("1001", 18)
+      );
+      expect(await ltyStaking.timeStaked(owner.address)).to.equal(
+        timeStaked.toString()
+      );
     });
   });
 });
